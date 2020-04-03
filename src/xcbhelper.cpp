@@ -3,9 +3,15 @@
 #include <string.h>
 #include "xcbhelper.h"
 
+XCBHelper::XCBHelper(
+    const char *display_name,
+    int *screen_p)
+{
+    m_conn = Connect(display_name, screen_p);
+}
 
-// Open connection to the server
-xcb_connection_t *Connect(
+
+xcb_connection_t *XCBHelper::Connect(
     const char *display_name,
     int *screen_p)
 {
@@ -18,19 +24,23 @@ xcb_connection_t *Connect(
 }
 
 
-// Disconnect from the server
-void Disconnect(
-    xcb_connection_t *conn)
+XCBHelper::~XCBHelper()
 {
-    xcb_disconnect(conn);
+    Disconnect();
+    m_conn = NULL;
 }
 
-// Get the screen by screen number
-xcb_screen_t *GetScreen(
-    xcb_connection_t *conn,
+
+void XCBHelper::Disconnect()
+{
+    xcb_disconnect(m_conn);
+}
+
+
+xcb_screen_t *XCBHelper::GetScreen(
     int              screen_number)
 {
-    const xcb_setup_t *setup = xcb_get_setup(conn);
+    const xcb_setup_t *setup = xcb_get_setup(m_conn);
     xcb_screen_iterator_t screen_iter = xcb_setup_roots_iterator(setup);
     if (xcb_setup_roots_length(setup) <= screen_number) {
         printf("Wrong number of screens\n");
@@ -41,28 +51,26 @@ xcb_screen_t *GetScreen(
     return screen_iter.data;
 }
 
-// Get the atom by name
-xcb_atom_t GetAtom(
-    xcb_connection_t *conn,
+
+xcb_atom_t XCBHelper::GetAtom(
     const char *name)
 {
-    xcb_intern_atom_cookie_t atom_cookie = xcb_intern_atom(conn, false, strlen(name), name);
-    xcb_intern_atom_reply_t *reply = xcb_intern_atom_reply(conn, atom_cookie, NULL);
+    xcb_intern_atom_cookie_t atom_cookie = xcb_intern_atom(m_conn, false, strlen(name), name);
+    xcb_intern_atom_reply_t *reply = xcb_intern_atom_reply(m_conn, atom_cookie, NULL);
     if (reply)
         return reply->atom;
     printf("Error getting the atom\n");
     exit(1);
 }
 
-// Get the window's name
-const char *GetWindowName(
-    xcb_connection_t *conn,
+
+const char *XCBHelper::GetWindowName(
     xcb_window_t window,
     xcb_atom_t net_name,
     const int maxWindows)
 {
-    xcb_get_property_cookie_t prop_cookie_name = xcb_get_property(conn, false, window, net_name, XCB_GET_PROPERTY_TYPE_ANY, 0, maxWindows);
-    xcb_get_property_reply_t *reply_prop_name = xcb_get_property_reply(conn, prop_cookie_name, NULL);
+    xcb_get_property_cookie_t prop_cookie_name = xcb_get_property(m_conn, false, window, net_name, XCB_GET_PROPERTY_TYPE_ANY, 0, maxWindows);
+    xcb_get_property_reply_t *reply_prop_name = xcb_get_property_reply(m_conn, prop_cookie_name, NULL);
     if (!reply_prop_name)
         return NULL;
     int length2 = xcb_get_property_value_length(reply_prop_name);
@@ -71,19 +79,16 @@ const char *GetWindowName(
     return (const char *) xcb_get_property_value(reply_prop_name);
 }
 
-// Get the window by name
-xcb_window_t GetWindowByName (
-    xcb_connection_t *conn,
+
+xcb_window_t XCBHelper::GetWindowByName (
     xcb_screen_t *screen,
     const char *required_name)
 {
-    // Get the window
-    xcb_atom_t net_list = GetAtom(conn, "_NET_CLIENT_LIST");
-    xcb_atom_t net_name = GetAtom(conn, "_NET_WM_NAME");
-
+    xcb_atom_t net_list = GetAtom("_NET_CLIENT_LIST");
+    xcb_atom_t net_name = GetAtom("_NET_WM_NAME");
     const int maxWindows = 1000;
-    xcb_get_property_cookie_t prop_cookie_list = xcb_get_property(conn, false, screen->root, net_list, XCB_GET_PROPERTY_TYPE_ANY, 0, maxWindows);
-    xcb_get_property_reply_t *reply_prop_list = xcb_get_property_reply(conn, prop_cookie_list, NULL);
+    xcb_get_property_cookie_t prop_cookie_list = xcb_get_property(m_conn, false, screen->root, net_list, XCB_GET_PROPERTY_TYPE_ANY, 0, maxWindows);
+    xcb_get_property_reply_t *reply_prop_list = xcb_get_property_reply(m_conn, prop_cookie_list, NULL);
     if (!reply_prop_list)
         return (xcb_window_t) NULL;
     int length = xcb_get_property_value_length(reply_prop_list);
@@ -91,7 +96,7 @@ xcb_window_t GetWindowByName (
         return (xcb_window_t) NULL;
     xcb_window_t* windows = (xcb_window_t*) xcb_get_property_value(reply_prop_list);
     for (int i = 0; i < length; i++) {
-        const char *name = GetWindowName(conn, windows[i], net_name, maxWindows);
+        const char *name = GetWindowName(windows[i], net_name, maxWindows);
         if (!name)
             continue;
         if (strcmp(name, required_name) == 0)
@@ -100,9 +105,8 @@ xcb_window_t GetWindowByName (
     return (xcb_window_t)NULL;
 }
 
-// Press or Release a mouse button
-void Button(
-    xcb_connection_t *conn,
+
+void XCBHelper::Button(
     xcb_window_t window,
     bool press)
 {
@@ -119,25 +123,23 @@ void Button(
     
     event->detail = XCB_BUTTON_INDEX_1;
     
-    xcb_send_event(conn, false, window, mask, (char*)event);
-    xcb_flush(conn);
+    xcb_send_event(m_conn, false, window, mask, (char*)event);
+    xcb_flush(m_conn);
     free(event);
 }
 
-// Warp the actual pointer on screen
-void WarpPointer(
-    xcb_connection_t *conn,
+
+void XCBHelper::WarpPointer(
     xcb_window_t window,
     int x,
     int y)
 {
-    xcb_warp_pointer(conn, XCB_NONE, window, 0, 0, 0, 0, x, y);
-    xcb_flush(conn);
+    xcb_warp_pointer(m_conn, XCB_NONE, window, 0, 0, 0, 0, x, y);
+    xcb_flush(m_conn);
 }
 
-// Send a notification the pointer moved
-void NotifyMovePointer(
-    xcb_connection_t *conn,
+
+void XCBHelper::NotifyMovePointer(
     xcb_window_t window,
     int16_t x,
     int16_t y)
@@ -151,7 +153,7 @@ void NotifyMovePointer(
     event->event_x = x;
     event->event_y = y;
     
-    xcb_send_event(conn, false, window, mask, (char*)event);
-    xcb_flush(conn);
+    xcb_send_event(m_conn, false, window, mask, (char*)event);
+    xcb_flush(m_conn);
     free(event);
 }

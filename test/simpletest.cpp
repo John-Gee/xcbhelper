@@ -13,21 +13,20 @@ int main(int argc, char **argv)
     int        *screen_p      = NULL;
     const int   screen_number = 0;
   
-    xcb_connection_t *conn = Connect(display_name, screen_p);
-    xcb_screen_t *screen   = GetScreen(conn, screen_number);
-    xcb_window_t window    = GetWindowByName(conn, screen, window_name);
+    XCBHelper    *helper   = new XCBHelper(display_name, screen_p);
+    xcb_screen_t *screen   = helper->GetScreen(screen_number);
+    xcb_window_t window    = helper->GetWindowByName(screen, window_name);
     
     if (window)
         printf("Found window!\n");
-    NotifyMovePointer(conn, window, 100, 200);
+    helper->NotifyMovePointer(window, 100, 200);
     // Button Press
-    Button(conn, window, true);
-    NotifyMovePointer(conn, window, 300, 600);
+    helper->Button(window, true);
+    helper->NotifyMovePointer(window, 300, 600);
     // Button Release
-    Button(conn, window, false);
+    helper->Button(window, false);
 
-    // Disconnect
-    Disconnect(conn);
+    free(helper);
 
     return 0;
 }

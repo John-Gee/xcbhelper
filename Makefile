@@ -1,4 +1,4 @@
-CC = gcc
+CC = g++
 pkgs = xcb
 CFLAGS = `pkg-config --cflags $(pkgs)` -fpermissive
 LIBS = `pkg-config --libs $(pkgs)`
