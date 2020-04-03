@@ -5,9 +5,13 @@
 
 XCBHelper::XCBHelper(
     const char *display_name,
-    int *screen_p)
+    int *screen_p,
+    int screen_number,
+    const char* window_name)
 {
     m_conn = Connect(display_name, screen_p);
+    xcb_screen_t *screen = GetScreen(screen_number);
+    m_window = GetWindowByName(screen, window_name);
 }
 
 
@@ -27,7 +31,8 @@ xcb_connection_t *XCBHelper::Connect(
 XCBHelper::~XCBHelper()
 {
     Disconnect();
-    m_conn = NULL;
+    m_conn = (xcb_connection_t *)NULL;
+    m_window = (xcb_window_t)NULL;
 }
 
 
@@ -38,7 +43,7 @@ void XCBHelper::Disconnect()
 
 
 xcb_screen_t *XCBHelper::GetScreen(
-    int              screen_number)
+    int screen_number)
 {
     const xcb_setup_t *setup = xcb_get_setup(m_conn);
     xcb_screen_iterator_t screen_iter = xcb_setup_roots_iterator(setup);
@@ -100,14 +105,16 @@ xcb_window_t XCBHelper::GetWindowByName (
         if (!name)
             continue;
         if (strcmp(name, required_name) == 0)
+        {
+            printf("Found window %s!\n", required_name);
             return windows[i];
+        }
     }
     return (xcb_window_t)NULL;
 }
 
 
 void XCBHelper::Button(
-    xcb_window_t window,
     bool press)
 {
     xcb_button_press_event_t *event = (xcb_button_press_event_t *)calloc(32, 1);
@@ -119,41 +126,39 @@ void XCBHelper::Button(
         event->response_type = XCB_BUTTON_RELEASE;
         mask = XCB_EVENT_MASK_BUTTON_RELEASE;
     }
-    event->event = window;
+    event->event = m_window;
     
     event->detail = XCB_BUTTON_INDEX_1;
     
-    xcb_send_event(m_conn, false, window, mask, (char*)event);
+    xcb_send_event(m_conn, false, m_window, mask, (char*)event);
     xcb_flush(m_conn);
     free(event);
 }
 
 
 void XCBHelper::WarpPointer(
-    xcb_window_t window,
     int x,
     int y)
 {
-    xcb_warp_pointer(m_conn, XCB_NONE, window, 0, 0, 0, 0, x, y);
+    xcb_warp_pointer(m_conn, XCB_NONE, m_window, 0, 0, 0, 0, x, y);
     xcb_flush(m_conn);
 }
 
 
 void XCBHelper::NotifyMovePointer(
-    xcb_window_t window,
     int16_t x,
     int16_t y)
 {
     xcb_motion_notify_event_t *event = (xcb_motion_notify_event_t *)calloc(32, 1);
     event->response_type = XCB_MOTION_NOTIFY;
     xcb_event_mask_t mask = XCB_EVENT_MASK_POINTER_MOTION;
-    event->event = window;
+    event->event = m_window;
     event->detail = XCB_MOTION_NORMAL;
     event->time = 1;
     event->event_x = x;
     event->event_y = y;
     
-    xcb_send_event(m_conn, false, window, mask, (char*)event);
+    xcb_send_event(m_conn, false, m_window, mask, (char*)event);
     xcb_flush(m_conn);
     free(event);
 }

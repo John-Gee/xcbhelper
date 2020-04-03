@@ -5,6 +5,8 @@
 
 class XCBHelper {
     xcb_connection_t *m_conn;
+    xcb_window_t m_window;
+
     // Open connection to the server
     xcb_connection_t *Connect(
         const char *display_name,
@@ -12,12 +14,7 @@ class XCBHelper {
 
     // Disconnect from the server
     void Disconnect();
-public:
-    XCBHelper(
-        const char *display_name,
-        int *screen_p);
-    ~XCBHelper();
-    
+
     // Get the screen by screen number
     xcb_screen_t *GetScreen(
         int screen_number);
@@ -37,20 +34,26 @@ public:
         xcb_screen_t *screen,
         const char *required_name);
 
+public:
+    XCBHelper(
+        const char *display_name,
+        int *screen_p,
+        int screen_number,
+        const char* window_name);
+
+    ~XCBHelper();
+
     // Send a notification a mouse button was pressed or released
     void Button(
-        xcb_window_t window,
         bool press);
 
     // Warp the actual pointer on screen
     void WarpPointer(
-        xcb_window_t window,
         int x,
         int y);
 
     // Send a notification the pointer moved
     void NotifyMovePointer(
-        xcb_window_t window,
         int16_t x,
         int16_t y);
 };
