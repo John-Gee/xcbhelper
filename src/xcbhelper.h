@@ -1,7 +1,7 @@
-#include <xcb/xcb.h>
-
 #ifndef XBCHELPER
 #define XBCHELPER
+
+#include <xcb/xcb.h>
 
 
 class Dimensions{

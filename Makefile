@@ -1,6 +1,6 @@
 CC = g++
 pkgs = xcb
-CFLAGS = `pkg-config --cflags $(pkgs)` -fpermissive
+CFLAGS = `pkg-config --cflags $(pkgs)` -fpermissive -std=c++17
 LIBS = `pkg-config --libs $(pkgs)`
 
 .PHONY: all
