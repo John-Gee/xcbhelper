@@ -3,6 +3,17 @@
 #ifndef XBCHELPER
 #define XBCHELPER
 
+
+class Dimensions{
+public:
+    uint16_t width;
+    uint16_t height;
+    Dimensions(
+        uint16_t width,
+        uint16_t height);
+};
+
+
 class XCBHelper {
     xcb_connection_t *m_conn;
     xcb_window_t m_window;
@@ -56,6 +67,9 @@ public:
     void NotifyMovePointer(
         int16_t x,
         int16_t y);
+
+    // Return the dimension of the window
+    Dimensions *GetWindowDimensions();
 };
 
 #endif

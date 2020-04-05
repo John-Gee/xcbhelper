@@ -3,6 +3,16 @@
 #include <string.h>
 #include "xcbhelper.h"
 
+
+Dimensions::Dimensions(
+        uint16_t width,
+        uint16_t height)
+{
+    this->width = width;
+    this->height = height;
+}
+
+
 XCBHelper::XCBHelper(
     const char *display_name,
     int *screen_p,
@@ -161,4 +171,12 @@ void XCBHelper::NotifyMovePointer(
     xcb_send_event(m_conn, false, m_window, mask, (char*)event);
     xcb_flush(m_conn);
     free(event);
+}
+
+
+Dimensions* XCBHelper::GetWindowDimensions()
+{
+    xcb_get_geometry_cookie_t geometry = xcb_get_geometry(m_conn, m_window);
+    xcb_get_geometry_reply_t *reply = xcb_get_geometry_reply(m_conn, geometry, NULL);
+    return new Dimensions(reply->width, reply->height);
 }
