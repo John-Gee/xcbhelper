@@ -15,11 +15,11 @@ int main(int argc, char **argv)
   
     XCBHelper *helper   = new XCBHelper(display_name, screen_p, screen_number, window_name);
     helper->NotifyMovePointer(100, 200);
-    // Button Press
-    helper->Button(true);
+    // Left Button Press
+    helper->PressLeftButton();
     helper->NotifyMovePointer(300, 600);
-    // Button Release
-    helper->Button(false);
+    // Left Button Release
+    helper->ReleaseLeftButton();
     Dimensions *dimensions = helper->GetWindowDimensions();
     printf("dimensions: %i x %i\n", dimensions->width, dimensions->height);
     free(dimensions);

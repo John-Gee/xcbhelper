@@ -45,6 +45,11 @@ class XCBHelper {
         xcb_screen_t *screen,
         const char *required_name);
 
+    // Send a notification a mouse button was pressed or released
+    void Button(
+        bool press,
+        xcb_button_index_t index);
+
 public:
     XCBHelper(
         const char *display_name,
@@ -54,9 +59,21 @@ public:
 
     ~XCBHelper();
 
-    // Send a notification a mouse button was pressed or released
-    void Button(
-        bool press);
+    // Send a notification
+    // that the left button was pressed
+    void PressLeftButton();
+
+    // Send a notification
+    // that the left button was released
+    void ReleaseLeftButton();
+
+    // Send a notification
+    // that the right button was pressed
+    void PressRightButton();
+
+    // Send a notification
+    // that the right button was released
+    void ReleaseRightButton();
 
     // Warp the actual pointer on screen
     void WarpPointer(

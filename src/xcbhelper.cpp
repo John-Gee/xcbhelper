@@ -125,7 +125,8 @@ xcb_window_t XCBHelper::GetWindowByName (
 
 
 void XCBHelper::Button(
-    bool press)
+    bool press,
+    xcb_button_index_t index)
 {
     xcb_button_press_event_t *event = (xcb_button_press_event_t *)calloc(32, 1);
     xcb_event_mask_t mask;
@@ -138,11 +139,31 @@ void XCBHelper::Button(
     }
     event->event = m_window;
     
-    event->detail = XCB_BUTTON_INDEX_1;
+    event->detail = index;
     
     xcb_send_event(m_conn, false, m_window, mask, (char*)event);
     xcb_flush(m_conn);
     free(event);
+}
+
+void XCBHelper::PressLeftButton()
+{
+    Button(true, XCB_BUTTON_INDEX_1);
+}
+
+void XCBHelper::ReleaseLeftButton()
+{
+    Button(false, XCB_BUTTON_INDEX_1);
+}
+
+void XCBHelper::PressRightButton()
+{
+    Button(true, XCB_BUTTON_INDEX_2);
+}
+
+void XCBHelper::ReleaseRightButton()
+{
+    Button(false, XCB_BUTTON_INDEX_2);
 }
 
 
