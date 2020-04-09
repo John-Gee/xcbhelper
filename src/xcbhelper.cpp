@@ -146,24 +146,56 @@ void XCBHelper::Button(
     free(event);
 }
 
+
 void XCBHelper::PressLeftButton()
 {
     Button(true, XCB_BUTTON_INDEX_1);
 }
+
+
+void XCBHelper::PressLeftButton(int x, int y)
+{
+    NotifyMovePointer(x, y);
+    PressLeftButton();
+}
+
 
 void XCBHelper::ReleaseLeftButton()
 {
     Button(false, XCB_BUTTON_INDEX_1);
 }
 
+
+void XCBHelper::ReleaseLeftButton(int x, int y)
+{
+    NotifyMovePointer(x, y);
+    ReleaseLeftButton();
+}
+
+
 void XCBHelper::PressRightButton()
 {
     Button(true, XCB_BUTTON_INDEX_2);
 }
 
+
+void XCBHelper::PressRightButton(int x, int y)
+{
+    NotifyMovePointer(x, y);
+    PressRightButton();
+}
+
+
 void XCBHelper::ReleaseRightButton()
 {
     Button(false, XCB_BUTTON_INDEX_2);
+}
+
+
+void XCBHelper::ReleaseRightButton(int x, int y)
+{
+    NotifyMovePointer(x, y);
+    ReleaseRightButton();
 }
 
 

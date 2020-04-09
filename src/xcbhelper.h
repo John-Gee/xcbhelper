@@ -64,16 +64,36 @@ public:
     void PressLeftButton();
 
     // Send a notification
+    // that the left button was pressed
+    // at x-y coordinates
+    void PressLeftButton(int x, int y);
+
+    // Send a notification
     // that the left button was released
     void ReleaseLeftButton();
+
+    // Send a notification
+    // that the left button was released
+    // at x-y coordinates
+    void ReleaseLeftButton(int x, int y);
 
     // Send a notification
     // that the right button was pressed
     void PressRightButton();
 
     // Send a notification
+    // that the right button was pressed
+    // at x-y coordinates
+    void PressRightButton(int x, int y);
+
+    // Send a notification
     // that the right button was released
     void ReleaseRightButton();
+
+    // Send a notification
+    // that the right button was released
+    // at x-y coordinates
+    void ReleaseRightButton(int x, int y);
 
     // Warp the actual pointer on screen
     void WarpPointer(
